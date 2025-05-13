@@ -1,20 +1,18 @@
-//导入dgram模块
+// 运行服务器端代码
 const dgram = require('dgram');
-// 导入fs模块
-const fs = require('fs');
-//创建UDP服务器
-const socket = dgram.createSocket('udp4');
-//绑定端口
-socket.bind(6666,'127.0.0.1');
-//接收数据
-socket.on('message', (data, rinfo) => {
-    fs.writeFile('./uploads/目标文件.jpg',data, (err) => {
-        if (err) console.log(err.message);
-    })
-    //回复数据
-    socket.send(`文件上传成功`, rinfo.port, rinfo.address)
-})
-//链接异常
-socket.on('error', (err) => {
-    console.log(`服务器异常：${err.message}`);
-})
+const server = dgram.createSocket('udp4');
+
+server.on('message', (msg, rinfo) => {
+  console.log(`接收到来自 ${rinfo.address}:${rinfo.port} 的数据: ${msg}`);
+  server.send(msg, rinfo.port, rinfo.address, (err, bytes) => {
+    if (err) {
+      console.log(`数据发送失败: ${err}`);
+    } else {
+      console.log(`数据发送成功: ${bytes} 字节`);
+    }
+  });
+});
+
+server.bind(8888, () => {
+  console.log('服务器已启动，等待客户端连接...');
+});
